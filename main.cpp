@@ -131,7 +131,7 @@ private:
 
 public:
     explicit Game(Difficulty dif)
-            : difficulty(dif), player(), map() {
+            : player(), map(), difficulty(dif) {
         player.setPosition(5, 5);
     }
 
