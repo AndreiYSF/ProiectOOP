@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <cstring>
 
 class Player {
 private:
@@ -168,6 +169,7 @@ public:
 };
 
 void setTerminalMode(termios &orig_termios) {
+    memset(&orig_termios, 0, sizeof(orig_termios));
     tcgetattr(STDIN_FILENO, &orig_termios);
     termios new_termios = orig_termios;
     new_termios.c_lflag &= ~(ICANON | ECHO);
@@ -186,7 +188,7 @@ int main() {
     termios orig_termios;
     setTerminalMode(orig_termios);
 
-    std::cout << "Press keys to see them in real time. Press 'q' to quit." << std::endl;
+    std::cout << "Press 'q' to quit." << std::endl;
 
     while (true) {
         fd_set readfds;
