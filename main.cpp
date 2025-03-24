@@ -2,6 +2,7 @@
 #include <chrono>
 #include <thread>
 #include <vector>
+#include <utility>
 
 #ifdef _WIN32
 #include <conio.h>
@@ -189,7 +190,6 @@ void enableRawMode() {
     tcsetattr(STDIN_FILENO, TCSANOW, &raw);
 }
 
-
 int kbhit() {
     timeval tv = { 0L, 0L };
     fd_set fds;
@@ -200,16 +200,23 @@ int kbhit() {
 #endif
 
 int main() {
-    std::cout << "Press '1' to quit." << std::endl;
+    std::cout << "Press '1' to quit. The program will auto-exit after 1 minute of inactivity." << std::endl;
+
+    // Record the time of the last activity
+    auto lastActivity = std::chrono::steady_clock::now();
 
 #ifdef _WIN32
     while (true) {
         if (_kbhit()) {
             char ch = _getch();
+            lastActivity = std::chrono::steady_clock::now(); // Update activity time
             if (ch == '1') break;
             system(CLEAR_COMMAND);
             std::cout << "Key pressed: " << ch << std::endl;
         }
+        // Auto exit after 1 minute of inactivity
+        auto now = std::chrono::steady_clock::now();
+        if (now - lastActivity >= std::chrono::minutes(1)) break;
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 #else
@@ -218,14 +225,18 @@ int main() {
         if (kbhit()) {
             char ch;
             read(STDIN_FILENO, &ch, 1);
+            lastActivity = std::chrono::steady_clock::now(); // Update activity time
             if (ch == '1') break;
             system(CLEAR_COMMAND);
             std::cout << "Key pressed: " << ch << std::endl;
         }
+        // Auto exit after 1 minute of inactivity
+        auto now = std::chrono::steady_clock::now();
+        if (now - lastActivity >= std::chrono::minutes(1)) break;
         usleep(50000);
     }
 #endif
 
-    std::cout << "Exiting..." << std::endl;
+    std::cout << "Exiting due to inactivity or key press..." << std::endl;
     return 0;
 }
