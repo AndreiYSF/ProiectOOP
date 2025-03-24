@@ -8,19 +8,19 @@ class Player {
 private:
     std::pair<int, int> position;
     int health;
-    int score;
+    int armor;
 
 public:
-    Player() : health(100), score(0) {}
+    Player() : health(100), armor(0) {}
 
     Player(const Player &other)
-            : position(other.position), health(other.health), score(other.score) {}
+            : position(other.position), health(other.health), armor(other.armor) {}
 
     Player& operator=(const Player &other) {
         if (this != &other) {
             position = other.position;
             health = other.health;
-            score = other.score;
+            armor = other.armor;
         }
         return *this;
     }
@@ -44,6 +44,14 @@ public:
 
     int getHealth() {
         return health;
+    }
+
+    void setArmor(int a) {
+        armor = a;
+    }
+
+    int getArmor() {
+        return armor;
     }
 };
 
@@ -109,6 +117,11 @@ public:
         return os;
     }
 
+    void run() {
+
+
+    }
+
     ~Map() {}
 };
 
@@ -162,6 +175,11 @@ public:
 
         player.setPosition((player[0] + dx + 10) % 10, (player[1] + dy + 10) % 10);
         map[player[0]][player[1]] = c;
+    }
+
+    void run() {
+
+        map.run();
     }
 
     ~Game() {}
@@ -227,6 +245,7 @@ int main() {
 
             }
 
+            game.run();
             std::cout << game << std::endl;
         }
 
