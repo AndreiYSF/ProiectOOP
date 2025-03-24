@@ -6,6 +6,7 @@
 
 class Player {
 private:
+
     std::pair<int, int> position;
     int health;
     int armor;
