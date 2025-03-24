@@ -1,23 +1,20 @@
 #include <iostream>
+#include <chrono>
+#include <thread>
+
 #ifdef _WIN32
-#include <windows.h>
+#include <conio.h>
+    #include <windows.h>
     #define CLEAR_COMMAND "cls"
-    // Define usleep for Windows (Sleep takes milliseconds)
-    inline void usleep(unsigned int microseconds) {
-        Sleep(microseconds / 1000);
-    }
 #else
 #include <unistd.h>
-#define CLEAR_COMMAND "clear"
-#endif
-
 #include <termios.h>
 #include <sys/select.h>
-#include <cstdio>
 #include <cstdlib>
-#include <vector>
-#include <string>
-#include <utility>
+#include <cstdio>
+#include <cstring>
+#define CLEAR_COMMAND "clear"
+#endif
 
 class Player {
 private:
@@ -122,7 +119,7 @@ public:
     }
 
     void run() {
-        // Add game logic here if needed.
+
     }
 
     ~Map() {}
@@ -178,72 +175,56 @@ public:
     ~Game() {}
 };
 
-void setTerminalMode(termios &orig_termios) {
-#ifdef _WIN32
+#ifndef _WIN32
 
-#else
+termios orig_termios;
+
+void enableRawMode() {
     tcgetattr(STDIN_FILENO, &orig_termios);
-    termios new_termios = orig_termios;
-    new_termios.c_lflag &= ~(ICANON | ECHO);
-    new_termios.c_cc[VMIN] = 0;
-    new_termios.c_cc[VTIME] = 0;
-    tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);
-#endif
+    atexit([](){ tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios); });
+
+    termios raw = orig_termios;
+    raw.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &raw);
 }
 
-void restoreTerminalMode(const termios &orig_termios) {
-#ifdef _WIN32
 
-#else
-    tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
-#endif
+int kbhit() {
+    timeval tv = { 0L, 0L };
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds);
+    return select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv);
 }
+#endif
 
 int main() {
-    Game game(Game::EASY);
-
-    termios orig_termios;
-    setTerminalMode(orig_termios);
-
     std::cout << "Press 'q' to quit." << std::endl;
 
+#ifdef _WIN32
     while (true) {
-        fd_set readfds;
-        FD_ZERO(&readfds);
-        FD_SET(STDIN_FILENO, &readfds);
-
-        timeval timeout;
-        timeout.tv_sec = 0;
-        timeout.tv_usec = 100000;
-
-        int ret = select(STDIN_FILENO + 1, &readfds, nullptr, nullptr, &timeout);
-        if (ret > 0 && FD_ISSET(STDIN_FILENO, &readfds)) {
+        if (_kbhit()) {
+            char ch = _getch();
+            if (ch == 'q') break;
             system(CLEAR_COMMAND);
-
-            int ch = getchar();
-            if (ch == 'q') {
-                break;
-            } else if (ch == 27) { // ESC key
-                int ch1 = getchar();
-                int ch2 = getchar();
-                if (ch1 == '[') {
-                    if (ch2 == 'A')
-                        game.move(-1, 0, '^');
-                    else if (ch2 == 'B')
-                        game.move(1, 0, 'v');
-                    else if (ch2 == 'C')
-                        game.move(0, 1, '>');
-                    else if (ch2 == 'D')
-                        game.move(0, -1, '<');
-                }
-            }
-
-            game.run();
-            std::cout << game << std::endl;
+            std::cout << "Key pressed: " << ch << std::endl;
         }
-        usleep(10000);
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
+#else
+    enableRawMode();
+    while (true) {
+        if (kbhit()) {
+            char ch;
+            read(STDIN_FILENO, &ch, 1);
+            if (ch == 'q') break;
+            system(CLEAR_COMMAND);
+            std::cout << "Key pressed: " << ch << std::endl;
+        }
+        usleep(50000);
+    }
+#endif
 
-    restoreTerminalMode(orig_termios);
+    std::cout << "Exiting..." << std::endl;
     return 0;
 }
