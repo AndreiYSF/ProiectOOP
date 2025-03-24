@@ -1,57 +1,238 @@
 #include <iostream>
-#include <array>
+#include <unistd.h>
+#include <termios.h>
+#include <sys/select.h>
+#include <cstdio>
 
-#include <Helper.h>
+class Player {
+private:
+    std::pair<int, int> position;
+    int health;
+    int score;
+
+public:
+    Player() : health(100), score(0) {}
+
+    Player(const Player &other)
+            : position(other.position), health(other.health), score(other.score) {}
+
+    Player& operator=(const Player &other) {
+        if (this != &other) {
+            position = other.position;
+            health = other.health;
+            score = other.score;
+        }
+        return *this;
+    }
+
+    ~Player() {}
+
+    void setPosition(int x, int y) {
+        position = std::make_pair(x, y);
+    }
+
+    int operator [] (int x) {
+
+        if (x == 0)
+            return position.first;
+        return position.second;
+    }
+
+    void setHealth(int h) {
+        health = h;
+    }
+
+    int getHealth() {
+        return health;
+    }
+};
+
+class Map {
+private:
+
+    std::vector <std::vector<char>> A;
+
+public:
+
+    static bool in(char c, std::string s) {
+
+        for (char i : s)
+            if (i == c)
+                return true;
+        return false;
+    }
+
+
+    Map()  {
+
+        A.resize(10, std::vector<char>(10, ' '));
+    }
+
+    Map(const Map& other) {
+
+        A = other.A;
+    }
+
+    Map& operator=(const Map& other) {
+        if (this != &other) {
+            A = other.A;
+        }
+        return *this;
+    }
+
+    std::vector<char>& operator[](int i) {
+        return A[i];
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Map& m) {
+
+        os << "+";
+        for (int j = 0; j < 10; j++) {
+            os << "---";
+        }
+        os << "+\n";
+
+        for (int i = 0; i < 10; i++) {
+            os << "|";
+            for (int j = 0; j < 10; j++) {
+                os << " " << m.A[i][j] << " ";
+            }
+            os << "|\n";
+        }
+
+        os << "+";
+        for (int j = 0; j < 10; j++) {
+            os << "---";
+        }
+        os << "+\n";
+
+        return os;
+    }
+
+    ~Map() {}
+};
+
+class Game {
+public:
+    enum Difficulty {
+        EASY,
+        HARD
+    };
+
+private:
+    Player player;
+    Map map;
+    Difficulty difficulty;
+
+public:
+
+    Game(Difficulty dif)
+            : difficulty(dif) {
+
+        player = Player();
+        map = Map();
+
+        player.setPosition(5, 5);
+    }
+
+    Game(const Game& other)
+            : player(other.player), map(other.map),
+              difficulty(other.difficulty) {}
+
+    Game& operator=(const Game& other) {
+        if (this != &other) {
+
+            difficulty = other.difficulty;
+            player = other.player;
+            map = other.map;
+        }
+        return *this;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Game& g) {
+
+        os << g.map;
+        return os;
+    }
+
+    void move(int dx, int dy, char c) {
+
+        if (Map::in(map[player[0]][player[1]], "^v<>"))
+            map[player[0]][player[1]] = ' ';
+
+        player.setPosition((player[0] + dx + 10) % 10, (player[1] + dy + 10) % 10);
+        map[player[0]][player[1]] = c;
+    }
+
+    ~Game() {}
+};
+
+void setTerminalMode(termios &orig_termios) {
+    tcgetattr(STDIN_FILENO, &orig_termios);
+    termios new_termios = orig_termios;
+    new_termios.c_lflag &= ~(ICANON | ECHO);
+    new_termios.c_cc[VMIN] = 0;
+    new_termios.c_cc[VTIME] = 0;
+    tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);
+}
+
+void restoreTerminalMode(const termios &orig_termios) {
+    tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
+}
 
 int main() {
-    std::cout << "Hello, world!\n";
-    std::array<int, 100> v{};
-    int nr;
-    std::cout << "Introduceți nr: ";
-    /////////////////////////////////////////////////////////////////////////
-    /// Observație: dacă aveți nevoie să citiți date de intrare de la tastatură,
-    /// dați exemple de date de intrare folosind fișierul tastatura.txt
-    /// Trebuie să aveți în fișierul tastatura.txt suficiente date de intrare
-    /// (în formatul impus de voi) astfel încât execuția programului să se încheie.
-    /// De asemenea, trebuie să adăugați în acest fișier date de intrare
-    /// pentru cât mai multe ramuri de execuție.
-    /// Dorim să facem acest lucru pentru a automatiza testarea codului, fără să
-    /// mai pierdem timp de fiecare dată să introducem de la zero aceleași date de intrare.
-    ///
-    /// Pe GitHub Actions (bife), fișierul tastatura.txt este folosit
-    /// pentru a simula date introduse de la tastatură.
-    /// Bifele verifică dacă programul are erori de compilare, erori de memorie și memory leaks.
-    ///
-    /// Dacă nu puneți în tastatura.txt suficiente date de intrare, îmi rezerv dreptul să vă
-    /// testez codul cu ce date de intrare am chef și să nu pun notă dacă găsesc vreun bug.
-    /// Impun această cerință ca să învățați să faceți un demo și să arătați părțile din
-    /// program care merg (și să le evitați pe cele care nu merg).
-    ///
-    /////////////////////////////////////////////////////////////////////////
-    std::cin >> nr;
-    /////////////////////////////////////////////////////////////////////////
-    for(int i = 0; i < nr; ++i) {
-        std::cout << "v[" << i << "] = ";
-        std::cin >> v[i];
+
+    Game game(Game::EASY);
+
+    termios orig_termios;
+    setTerminalMode(orig_termios);
+
+    std::cout << "Press keys to see them in real time. Press 'q' to quit." << std::endl;
+
+    while (true) {
+
+        fd_set readfds;
+        FD_ZERO(&readfds);
+        FD_SET(STDIN_FILENO, &readfds);
+
+        timeval timeout;
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 100000;
+
+        int ret = select(STDIN_FILENO + 1, &readfds, NULL, NULL, &timeout);
+        if (ret > 0 && FD_ISSET(STDIN_FILENO, &readfds)) {
+
+            system("clear");
+
+            int ch = getchar();
+            if (ch == 'q') {
+                break;
+            }
+            else if (ch == 27) {
+
+                int ch1 = getchar();
+                int ch2 = getchar();
+                if (ch1 == '[') {
+                    if (ch2 == 'A')
+                        game.move(-1, 0, '^');
+                    else if (ch2 == 'B')
+                        game.move(1, 0, 'v');
+                    else if (ch2 == 'C')
+                        game.move(0, 1, '>');
+                    else if (ch2 == 'D')
+                        game.move(0, -1, '<');
+                }
+            }
+            else {
+
+            }
+
+            std::cout << game << std::endl;
+        }
+
+        usleep(10000);
     }
-    std::cout << "\n\n";
-    std::cout << "Am citit de la tastatură " << nr << " elemente:\n";
-    for(int i = 0; i < nr; ++i) {
-        std::cout << "- " << v[i] << "\n";
-    }
-    ///////////////////////////////////////////////////////////////////////////
-    /// Pentru date citite din fișier, NU folosiți tastatura.txt. Creați-vă voi
-    /// alt fișier propriu cu ce alt nume doriți.
-    /// Exemplu:
-    /// std::ifstream fis("date.txt");
-    /// for(int i = 0; i < nr2; ++i)
-    ///     fis >> v2[i];
-    ///
-    ///////////////////////////////////////////////////////////////////////////
-    ///                Exemplu de utilizare cod generat                     ///
-    ///////////////////////////////////////////////////////////////////////////
-    Helper helper;
-    helper.help();
-    ///////////////////////////////////////////////////////////////////////////
+
+    restoreTerminalMode(orig_termios);
     return 0;
 }
