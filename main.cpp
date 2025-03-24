@@ -210,8 +210,6 @@ int main() {
 
 #ifdef _WIN32
 
-    bool ok = false;
-
     while (true) {
         if (_kbhit()) {
             char ch = _getch();
@@ -219,7 +217,7 @@ int main() {
             if (ch == 'q') break;
             system(CLEAR_COMMAND);
 
-            ok = false;
+            bool ok = false;
 
             if (ch == 'w')
                 game.move(-1, 0, '^'), ok = true;
@@ -240,8 +238,6 @@ int main() {
     }
 #else
 
-    bool ok = false;
-
     enableRawMode();
     while (true) {
         if (kbhit()) {
@@ -251,7 +247,7 @@ int main() {
             if (ch == 'q') break;
             system(CLEAR_COMMAND);
 
-            ok = false;
+            bool ok = false;
 
             if (ch == 'w')
                 game.move(-1, 0, '^'), ok = true;
