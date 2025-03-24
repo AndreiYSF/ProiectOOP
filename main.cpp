@@ -1,5 +1,16 @@
 #include <iostream>
+#ifdef _WIN32
+#include <windows.h>
+    #define CLEAR_COMMAND "cls"
+    // Define usleep for Windows (Sleep takes milliseconds)
+    inline void usleep(unsigned int microseconds) {
+        Sleep(microseconds / 1000);
+    }
+#else
 #include <unistd.h>
+#define CLEAR_COMMAND "clear"
+#endif
+
 #include <termios.h>
 #include <sys/select.h>
 #include <cstdio>
@@ -7,7 +18,6 @@
 #include <vector>
 #include <string>
 #include <utility>
-#include <cstring>
 
 class Player {
 private:
@@ -169,17 +179,24 @@ public:
 };
 
 void setTerminalMode(termios &orig_termios) {
-    memset(&orig_termios, 0, sizeof(orig_termios));
+#ifdef _WIN32
+
+#else
     tcgetattr(STDIN_FILENO, &orig_termios);
     termios new_termios = orig_termios;
     new_termios.c_lflag &= ~(ICANON | ECHO);
     new_termios.c_cc[VMIN] = 0;
     new_termios.c_cc[VTIME] = 0;
     tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);
+#endif
 }
 
 void restoreTerminalMode(const termios &orig_termios) {
+#ifdef _WIN32
+
+#else
     tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
+#endif
 }
 
 int main() {
@@ -201,7 +218,7 @@ int main() {
 
         int ret = select(STDIN_FILENO + 1, &readfds, nullptr, nullptr, &timeout);
         if (ret > 0 && FD_ISSET(STDIN_FILENO, &readfds)) {
-            system("clear");
+            system(CLEAR_COMMAND);
 
             int ch = getchar();
             if (ch == 'q') {
