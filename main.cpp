@@ -209,6 +209,9 @@ int main() {
     auto lastActivity = std::chrono::steady_clock::now();
 
 #ifdef _WIN32
+
+    bool ok = false;
+
     while (true) {
         if (_kbhit()) {
             char ch = _getch();
@@ -216,17 +219,19 @@ int main() {
             if (ch == 'q') break;
             system(CLEAR_COMMAND);
 
-            if (ch == 'w')
-                game.move(-1, 0, '^');
-            else if (ch == 's')
-                game.move(1, 0, 'v');
-            else if (ch == 'a')
-                game.move(0, -1, '<');
-            else if (ch == 'd')
-                game.move(0, 1, '>');
+            ok = false;
 
-            game.run();
-            std::cout << game;
+            if (ch == 'w')
+                game.move(-1, 0, '^'), ok = true;
+            else if (ch == 's')
+                game.move(1, 0, 'v'), ok = true;
+            else if (ch == 'a')
+                game.move(0, -1, '<'), ok = true;
+            else if (ch == 'd')
+                game.move(0, 1, '>'), ok = true;
+
+            if (ok)
+                std::cout << game;
         }
         // Auto exit after 1 minute of inactivity
         auto now = std::chrono::steady_clock::now();
@@ -234,6 +239,9 @@ int main() {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 #else
+
+    bool ok = false;
+
     enableRawMode();
     while (true) {
         if (kbhit()) {
@@ -243,17 +251,19 @@ int main() {
             if (ch == 'q') break;
             system(CLEAR_COMMAND);
 
-            if (ch == 'w')
-                game.move(-1, 0, '^');
-            else if (ch == 's')
-                game.move(1, 0, 'v');
-            else if (ch == 'a')
-                game.move(0, -1, '<');
-            else if (ch == 'd')
-                game.move(0, 1, '>');
+            ok = false;
 
-            game.run();
-            std::cout << game;
+            if (ch == 'w')
+                game.move(-1, 0, '^'), ok = true;
+            else if (ch == 's')
+                game.move(1, 0, 'v'), ok = true;
+            else if (ch == 'a')
+                game.move(0, -1, '<'), ok = true;
+            else if (ch == 'd')
+                game.move(0, 1, '>'), ok = true;
+
+            if (ok)
+                std::cout << game;
         }
         // Auto exit after 1 minute of inactivity
         auto now = std::chrono::steady_clock::now();
