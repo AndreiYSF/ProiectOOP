@@ -200,7 +200,10 @@ int kbhit() {
 #endif
 
 int main() {
-    std::cout << "Press '1' to quit. The program will auto-exit after 1 minute of inactivity." << std::endl;
+
+    Game game(Game::EASY);
+
+    std::cout << "Press 'q' to quit. The program will auto-exit after 1 minute of inactivity." << std::endl;
 
     // Record the time of the last activity
     auto lastActivity = std::chrono::steady_clock::now();
@@ -210,9 +213,20 @@ int main() {
         if (_kbhit()) {
             char ch = _getch();
             lastActivity = std::chrono::steady_clock::now(); // Update activity time
-            if (ch == '1') break;
+            if (ch == 'q') break;
             system(CLEAR_COMMAND);
-            std::cout << "Key pressed: " << ch << std::endl;
+
+            if (ch == 'w')
+                game.move(-1, 0, '^');
+            else if (ch == 's')
+                game.move(1, 0, 'v');
+            else if (ch == 'a')
+                game.move(0, -1, '<');
+            else if (ch == 'd')
+                game.move(0, 1, '>');
+
+            game.run();
+            std::cout << game;
         }
         // Auto exit after 1 minute of inactivity
         auto now = std::chrono::steady_clock::now();
@@ -226,9 +240,20 @@ int main() {
             char ch;
             read(STDIN_FILENO, &ch, 1);
             lastActivity = std::chrono::steady_clock::now(); // Update activity time
-            if (ch == '1') break;
+            if (ch == 'q') break;
             system(CLEAR_COMMAND);
-            std::cout << "Key pressed: " << ch << std::endl;
+
+            if (ch == 'w')
+                game.move(-1, 0, '^');
+            else if (ch == 's')
+                game.move(1, 0, 'v');
+            else if (ch == 'a')
+                game.move(0, -1, '<');
+            else if (ch == 'd')
+                game.move(0, 1, '>');
+
+            game.run();
+            std::cout << game;
         }
         // Auto exit after 1 minute of inactivity
         auto now = std::chrono::steady_clock::now();
