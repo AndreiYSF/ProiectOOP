@@ -1,6 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <vector>
 
 #ifdef _WIN32
 #include <conio.h>
