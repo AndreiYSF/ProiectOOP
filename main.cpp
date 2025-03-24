@@ -3,16 +3,19 @@
 #include <termios.h>
 #include <sys/select.h>
 #include <cstdio>
+#include <cstdlib>
+#include <vector>
+#include <string>
+#include <utility>
 
 class Player {
 private:
-
     std::pair<int, int> position;
     int health;
     int armor;
 
 public:
-    Player() : health(100), armor(0) {}
+    Player() : position({0, 0}), health(100), armor(0) {}
 
     Player(const Player &other)
             : position(other.position), health(other.health), armor(other.armor) {}
@@ -32,18 +35,15 @@ public:
         position = std::make_pair(x, y);
     }
 
-    int operator [] (int x) {
-
-        if (x == 0)
-            return position.first;
-        return position.second;
+    int operator[](int x) const {
+        return (x == 0) ? position.first : position.second;
     }
 
     void setHealth(int h) {
         health = h;
     }
 
-    int getHealth() {
+    int getHealth() const {
         return health;
     }
 
@@ -51,36 +51,29 @@ public:
         armor = a;
     }
 
-    int getArmor() {
+    int getArmor() const {
         return armor;
     }
 };
 
 class Map {
 private:
-
-    std::vector <std::vector<char>> A;
+    std::vector<std::vector<char>> A;
 
 public:
-
-    static bool in(char c, std::string s) {
-
+    static bool in(char c, const std::string &s) {
         for (char i : s)
             if (i == c)
                 return true;
         return false;
     }
 
-
-    Map()  {
-
+    Map() {
         A.resize(10, std::vector<char>(10, ' '));
     }
 
-    Map(const Map& other) {
-
-        A = other.A;
-    }
+    Map(const Map& other)
+            : A(other.A) {}
 
     Map& operator=(const Map& other) {
         if (this != &other) {
@@ -94,7 +87,6 @@ public:
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Map& m) {
-
         os << "+";
         for (int j = 0; j < 10; j++) {
             os << "---";
@@ -119,8 +111,7 @@ public:
     }
 
     void run() {
-
-
+        // Add game logic here if needed.
     }
 
     ~Map() {}
@@ -139,23 +130,16 @@ private:
     Difficulty difficulty;
 
 public:
-
-    Game(Difficulty dif)
-            : difficulty(dif) {
-
-        player = Player();
-        map = Map();
-
+    explicit Game(Difficulty dif)
+            : difficulty(dif), player(), map() {
         player.setPosition(5, 5);
     }
 
     Game(const Game& other)
-            : player(other.player), map(other.map),
-              difficulty(other.difficulty) {}
+            : player(other.player), map(other.map), difficulty(other.difficulty) {}
 
     Game& operator=(const Game& other) {
         if (this != &other) {
-
             difficulty = other.difficulty;
             player = other.player;
             map = other.map;
@@ -164,13 +148,11 @@ public:
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Game& g) {
-
         os << g.map;
         return os;
     }
 
     void move(int dx, int dy, char c) {
-
         if (Map::in(map[player[0]][player[1]], "^v<>"))
             map[player[0]][player[1]] = ' ';
 
@@ -179,7 +161,6 @@ public:
     }
 
     void run() {
-
         map.run();
     }
 
@@ -200,7 +181,6 @@ void restoreTerminalMode(const termios &orig_termios) {
 }
 
 int main() {
-
     Game game(Game::EASY);
 
     termios orig_termios;
@@ -209,7 +189,6 @@ int main() {
     std::cout << "Press keys to see them in real time. Press 'q' to quit." << std::endl;
 
     while (true) {
-
         fd_set readfds;
         FD_ZERO(&readfds);
         FD_SET(STDIN_FILENO, &readfds);
@@ -218,17 +197,14 @@ int main() {
         timeout.tv_sec = 0;
         timeout.tv_usec = 100000;
 
-        int ret = select(STDIN_FILENO + 1, &readfds, NULL, NULL, &timeout);
+        int ret = select(STDIN_FILENO + 1, &readfds, nullptr, nullptr, &timeout);
         if (ret > 0 && FD_ISSET(STDIN_FILENO, &readfds)) {
-
             system("clear");
 
             int ch = getchar();
             if (ch == 'q') {
                 break;
-            }
-            else if (ch == 27) {
-
+            } else if (ch == 27) { // ESC key
                 int ch1 = getchar();
                 int ch2 = getchar();
                 if (ch1 == '[') {
@@ -242,14 +218,10 @@ int main() {
                         game.move(0, -1, '<');
                 }
             }
-            else {
-
-            }
 
             game.run();
             std::cout << game << std::endl;
         }
-
         usleep(10000);
     }
 

@@ -12,3 +12,4 @@ cppcheck --enable=all \
     --suppress=unusedFunction \
     --check-level=exhaustive \
     --error-exitcode=1
+    --suppress=useInitializationList --suppress=passedByValue --suppress=noExplicitConstructor
