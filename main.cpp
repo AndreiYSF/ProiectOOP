@@ -200,13 +200,13 @@ int kbhit() {
 #endif
 
 int main() {
-    std::cout << "Press 'q' to quit." << std::endl;
+    std::cout << "Press '1' to quit." << std::endl;
 
 #ifdef _WIN32
     while (true) {
         if (_kbhit()) {
             char ch = _getch();
-            if (ch == 'q') break;
+            if (ch == '1') break;
             system(CLEAR_COMMAND);
             std::cout << "Key pressed: " << ch << std::endl;
         }
@@ -218,7 +218,7 @@ int main() {
         if (kbhit()) {
             char ch;
             read(STDIN_FILENO, &ch, 1);
-            if (ch == 'q') break;
+            if (ch == '1') break;
             system(CLEAR_COMMAND);
             std::cout << "Key pressed: " << ch << std::endl;
         }
