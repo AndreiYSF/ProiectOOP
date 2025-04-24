@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include "IndexOutOfRangeException.h"
 
 class Obstacol {
 private:
@@ -39,7 +40,7 @@ public:
         else if (k == 1)
             return y;
         else
-            throw std::out_of_range("Index out of range");
+            throw IndexOutOfRangeException(k);
     }
 
     char getSimbol() const { return simbol; }

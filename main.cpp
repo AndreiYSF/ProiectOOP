@@ -10,8 +10,8 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
-#include "game.h"
-#include "obstacol.h"
+#include "Game.h"
+#include "Obstacol.h"
 
 termios orig_termios;
 
@@ -69,6 +69,7 @@ int main() {
             // Auto exit after 1 minute of inactivity
             auto now = std::chrono::steady_clock::now();
             if (now - lastActivity >= std::chrono::minutes(1)) break;
+
             usleep(50000);
         }
     }

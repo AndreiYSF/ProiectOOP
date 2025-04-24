@@ -1,10 +1,15 @@
 #include <bits/stdc++.h>
 #include "Obstacol.h"
+#include "PositionOutOfRangeException.h"
 
 class Diagonal : public Obstacol {
 public:
     Diagonal(int x = 0, int y = 0, char simbol = 'H', int damage = 0)
-            : Obstacol(x, y, simbol, damage) {}
+            : Obstacol(x, y, simbol, damage) {
+
+        if (x < 0 || x >= 15 || y < 0 || y >= 15)
+            throw PositionOutOfRangeException(x, y);
+    }
 
     Diagonal(const Diagonal &other)
             : Obstacol(other) {}

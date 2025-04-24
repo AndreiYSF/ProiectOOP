@@ -127,7 +127,8 @@ class Game {
 public:
     enum Difficulty {
         EASY,
-        HARD
+        MEDIUM,
+        HARD,
     };
 
 private:
@@ -138,7 +139,10 @@ private:
 public:
     explicit Game(Difficulty dif)
             : player(), map(), difficulty(dif) {
+
         player.setPosition(5, 5);
+
+
     }
 
     Game(const Game& other)

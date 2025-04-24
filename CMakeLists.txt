@@ -67,6 +67,12 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         Diagonal.h
         PositionOutOfRangeException.cpp
         PositionOutOfRangeException.h
+        IndexOutOfRangeException.cpp
+        IndexOutOfRangeException.h
+        InvalidDirectionException.cpp
+        InvalidDirectionException.h
+        ManagerObiecte.cpp
+        ManagerObiecte.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
