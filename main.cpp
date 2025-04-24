@@ -12,6 +12,7 @@
 #include <cstring>
 #include "Game.h"
 #include "Obstacol.h"
+#include "ManagerObiecte.h"
 
 termios orig_termios;
 
@@ -36,7 +37,7 @@ int main() {
 
     try {
 
-        Game game(Game::EASY);
+        Game game(Game::MEDIUM);
 
         std::cout << "Press 'q' to quit. The program will auto-exit after 1 minute of inactivity." << std::endl;
 
@@ -52,24 +53,28 @@ int main() {
                 if (ch == 'q') break;
                 system("clear");
 
-                bool ok = false;
-
                 if (ch == 'w')
-                    game.move(-1, 0, '^'), ok = true;
+                    game.move(-1, 0, '^');
                 else if (ch == 's')
-                    game.move(1, 0, 'v'), ok = true;
+                    game.move(1, 0, 'v');
                 else if (ch == 'a')
-                    game.move(0, -1, '<'), ok = true;
+                    game.move(0, -1, '<');
                 else if (ch == 'd')
-                    game.move(0, 1, '>'), ok = true;
-
-                if (ok)
-                    std::cout << game;
+                    game.move(0, 1, '>');
             }
             // Auto exit after 1 minute of inactivity
             auto now = std::chrono::steady_clock::now();
             if (now - lastActivity >= std::chrono::minutes(1)) break;
 
+            game.run();
+            if (game.getHealth() <= 0) {
+
+                std::cout << "Game Over!" << std::endl;
+                return 0;
+            }
+            system("clear");
+            std::cout << game << std::endl;
+            std::cout << "Health: " << game.getHealth() << std::endl;
             usleep(50000);
         }
     }

@@ -1,3 +1,4 @@
+#pragma once
 #include <vector>
 #include "Obstacol.h"
 #include "Horizontal.h"
@@ -7,7 +8,11 @@
 
 class ManagerObiect {
 public:
-    void adauga(int x, int y, char simbol, char direction, int damage = 0) {
+
+    ManagerObiect() = default;
+    ~ManagerObiect() = default;
+
+    void add(int x, int y, char simbol, char direction, int damage = 0) {
         std::unique_ptr<Obstacol> o;
         switch (direction) {
             case 'h':
@@ -30,6 +35,22 @@ public:
             o->executaMiscare();
     }
 
+    void display() {
+        for (auto& o : obstacole_) {
+            std::cout << "At position (" << (*o)[0] << ", " << (*o)[1] << ")\n";
+        }
+    }
+
+    int size() const {
+        return obstacole_.size();
+    }
+
+    Obstacol& operator[](std::size_t index) const {
+        return *obstacole_.at(index);
+    }
+
 private:
+
+
     std::vector<std::unique_ptr<Obstacol>> obstacole_;
 };

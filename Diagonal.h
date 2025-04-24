@@ -1,3 +1,4 @@
+#pragma once
 #include <bits/stdc++.h>
 #include "Obstacol.h"
 #include "PositionOutOfRangeException.h"
@@ -29,12 +30,12 @@ public:
 
             if (dif >= 0) {
 
-                (*this)[0] = dif;
-                (*this)[1] = 0;
-            }
-            else {
                 (*this)[0] = 0;
                 (*this)[1] = dif;
+            }
+            else {
+                (*this)[0] = - dif;
+                (*this)[1] = 0;
             }
         }
     }
