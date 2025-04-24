@@ -11,12 +11,13 @@
 #include <cstdio>
 #include <cstring>
 #include "game.h"
+#include "obstacol.h"
 
 termios orig_termios;
 
 void enableRawMode() {
     tcgetattr(STDIN_FILENO, &orig_termios);
-    atexit([](){ tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios); });
+    atexit([]() { tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios); });
 
     termios raw = orig_termios;
     raw.c_lflag &= ~(ICANON | ECHO);
@@ -24,7 +25,7 @@ void enableRawMode() {
 }
 
 int kbhit() {
-    timeval tv = { 0L, 0L };
+    timeval tv = {0L, 0L};
     fd_set fds;
     FD_ZERO(&fds);
     FD_SET(STDIN_FILENO, &fds);
@@ -33,40 +34,48 @@ int kbhit() {
 
 int main() {
 
-    Game game(Game::EASY);
+    try {
 
-    std::cout << "Press 'q' to quit. The program will auto-exit after 1 minute of inactivity." << std::endl;
+        Game game(Game::EASY);
 
-    // Record the time of the last activity
-    auto lastActivity = std::chrono::steady_clock::now();
+        std::cout << "Press 'q' to quit. The program will auto-exit after 1 minute of inactivity." << std::endl;
 
-    enableRawMode();
-    while (true) {
-        if (kbhit()) {
-            char ch;
-            read(STDIN_FILENO, &ch, 1);
-            lastActivity = std::chrono::steady_clock::now(); // Update activity time
-            if (ch == 'q') break;
-            system("clear");
+        // Record the time of the last activity
+        auto lastActivity = std::chrono::steady_clock::now();
 
-            bool ok = false;
+        enableRawMode();
+        while (true) {
+            if (kbhit()) {
+                char ch;
+                read(STDIN_FILENO, &ch, 1);
+                lastActivity = std::chrono::steady_clock::now(); // Update activity time
+                if (ch == 'q') break;
+                system("clear");
 
-            if (ch == 'w')
-                game.move(-1, 0, '^'), ok = true;
-            else if (ch == 's')
-                game.move(1, 0, 'v'), ok = true;
-            else if (ch == 'a')
-                game.move(0, -1, '<'), ok = true;
-            else if (ch == 'd')
-                game.move(0, 1, '>'), ok = true;
+                bool ok = false;
 
-            if (ok)
-                std::cout << game;
+                if (ch == 'w')
+                    game.move(-1, 0, '^'), ok = true;
+                else if (ch == 's')
+                    game.move(1, 0, 'v'), ok = true;
+                else if (ch == 'a')
+                    game.move(0, -1, '<'), ok = true;
+                else if (ch == 'd')
+                    game.move(0, 1, '>'), ok = true;
+
+                if (ok)
+                    std::cout << game;
+            }
+            // Auto exit after 1 minute of inactivity
+            auto now = std::chrono::steady_clock::now();
+            if (now - lastActivity >= std::chrono::minutes(1)) break;
+            usleep(50000);
         }
-        // Auto exit after 1 minute of inactivity
-        auto now = std::chrono::steady_clock::now();
-        if (now - lastActivity >= std::chrono::minutes(1)) break;
-        usleep(50000);
+    }
+    catch (const std::exception &e) {
+
+        std::cerr << "An error occurred: " << e.what() << std::endl;
+        return 0;
     }
 
     std::cout << "Exiting due to inactivity or key press..." << std::endl;

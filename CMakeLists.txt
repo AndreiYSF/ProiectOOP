@@ -53,6 +53,20 @@ add_executable(${MAIN_EXECUTABLE_NAME}
     generated/src/Helper.cpp
         Game.cpp
         Game.h
+        Obstacol.cpp
+        Obstacol.h
+        Game.cpp
+        Game.h
+        Obstacol.cpp
+        Obstacol.h
+        Horizontal.cpp
+        Horizontal.h
+        Vertical.cpp
+        Vertical.h
+        Diagonal.cpp
+        Diagonal.h
+        PositionOutOfRangeException.cpp
+        PositionOutOfRangeException.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

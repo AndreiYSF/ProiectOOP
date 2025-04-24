@@ -1,3 +1,16 @@
+#include <iostream>
+#include <chrono>
+#include <thread>
+#include <vector>
+#include <utility>
+
+#include <unistd.h>
+#include <termios.h>
+#include <sys/select.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+
 class Player {
 private:
     std::pair<int, int> position;
@@ -59,7 +72,7 @@ public:
     }
 
     Map() {
-        A.resize(10, std::vector<char>(10, ' '));
+        A.resize(15, std::vector<char>(15, ' '));
     }
 
     Map(const Map& other)
@@ -78,21 +91,21 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const Map& m) {
         os << "+";
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 15; j++) {
             os << "---";
         }
         os << "+\n";
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 15; i++) {
             os << "|";
-            for (int j = 0; j < 10; j++) {
+            for (int j = 0; j < 15; j++) {
                 os << " " << m.A[i][j] << " ";
             }
             os << "|\n";
         }
 
         os << "+";
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 15; j++) {
             os << "---";
         }
         os << "+\n";
@@ -149,7 +162,7 @@ public:
         if (Map::in(map[player[0]][player[1]], "^v<>"))
             map[player[0]][player[1]] = ' ';
 
-        player.setPosition((player[0] + dx + 10) % 10, (player[1] + dy + 10) % 10);
+        player.setPosition((player[0] + dx + 15) % 15, (player[1] + dy + 15) % 15);
         map[player[0]][player[1]] = c;
     }
 
