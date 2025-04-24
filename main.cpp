@@ -4,19 +4,12 @@
 #include <vector>
 #include <utility>
 
-#ifdef _WIN32
-#include <conio.h>
-    #include <windows.h>
-    #define CLEAR_COMMAND "cls"
-#else
 #include <unistd.h>
 #include <termios.h>
 #include <sys/select.h>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
-#define CLEAR_COMMAND "clear"
-#endif
 
 class Player {
 private:
@@ -124,7 +117,10 @@ public:
 
     }
 
-    ~Map() {}
+    ~Map() {
+
+        A.clear();
+    }
 };
 
 class Game {
@@ -177,8 +173,6 @@ public:
     ~Game() {}
 };
 
-#ifndef _WIN32
-
 termios orig_termios;
 
 void enableRawMode() {
@@ -197,7 +191,6 @@ int kbhit() {
     FD_SET(STDIN_FILENO, &fds);
     return select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv);
 }
-#endif
 
 int main() {
 
@@ -208,36 +201,6 @@ int main() {
     // Record the time of the last activity
     auto lastActivity = std::chrono::steady_clock::now();
 
-#ifdef _WIN32
-
-    while (true) {
-        if (_kbhit()) {
-            char ch = _getch();
-            lastActivity = std::chrono::steady_clock::now(); // Update activity time
-            if (ch == 'q') break;
-            system(CLEAR_COMMAND);
-
-            bool ok = false;
-
-            if (ch == 'w')
-                game.move(-1, 0, '^'), ok = true;
-            else if (ch == 's')
-                game.move(1, 0, 'v'), ok = true;
-            else if (ch == 'a')
-                game.move(0, -1, '<'), ok = true;
-            else if (ch == 'd')
-                game.move(0, 1, '>'), ok = true;
-
-            if (ok)
-                std::cout << game;
-        }
-        // Auto exit after 1 minute of inactivity
-        auto now = std::chrono::steady_clock::now();
-        if (now - lastActivity >= std::chrono::minutes(1)) break;
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    }
-#else
-
     enableRawMode();
     while (true) {
         if (kbhit()) {
@@ -245,7 +208,7 @@ int main() {
             read(STDIN_FILENO, &ch, 1);
             lastActivity = std::chrono::steady_clock::now(); // Update activity time
             if (ch == 'q') break;
-            system(CLEAR_COMMAND);
+            system("clear");
 
             bool ok = false;
 
@@ -266,7 +229,6 @@ int main() {
         if (now - lastActivity >= std::chrono::minutes(1)) break;
         usleep(50000);
     }
-#endif
 
     std::cout << "Exiting due to inactivity or key press..." << std::endl;
     return 0;
